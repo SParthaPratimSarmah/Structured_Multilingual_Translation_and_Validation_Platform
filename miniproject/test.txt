@@ -1,0 +1,3 @@
+Partha,22,Guwahati
+Ridip,23,Newwork
+Nilotpla,24,NML

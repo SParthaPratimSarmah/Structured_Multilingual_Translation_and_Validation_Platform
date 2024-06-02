@@ -1,0 +1,70 @@
+<html>
+	<head>
+		<title>Upload Multiple</title>
+	</head>
+	<body>
+		<!--we have form like this-->
+		<form action="insert.php"name="readfile" method="post" enctype="multipart/form-data">
+		<table cellpadding="10" align="center" rules="all" frame="box">
+			<tr>
+				<td colspan="2">
+					<h3>
+						Imei upload
+					</h3>
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<label for="txt-file">Open File(*.txt):</label>
+				</td>
+				<td>
+					<input type="file" name="file1[]" multiple="multiple">
+					<!--file to read, we attribute name as blank array to store multiple file and multiple='multiple' to enable multiple select file-->
+				</td>
+			</tr>
+			<tr>
+				<td colspan="2" align="right">
+					<input type="submit" name="read" value="Insert">
+					<!--button to submit the form to read data from the file-->
+				</td>
+			</tr>
+		</table>
+		</form>
+		<?php
+			//check if we have click submit form with button name read
+			if(isset($_POST['read'])){
+				//now we need to connect to database
+				mysql_connect('localhost','root','','multilogin') ;//or die('could not connect to database'.mysql_error());//connection to database server
+				//mysql_connect(servername,username,password)
+				//mysql_select_db('web_learning');//select database
+				//mysql_select_db(databasename);
+				//now start test file upload 
+				//we need to get total count of selected file 
+				$total=count($_FILES['file1']['name']);
+				//echo $total;
+				//now i will use for loop to get file from selected 
+				for($i=0;$i<$total;$i++){
+					//now we need to upload only text file with ".txt" wo we must check the extention of file by 
+					$file_type=$_FILES['file1']['type'][$i];//get file type of selected file to read
+					$allow_type=array('text/plain');//allow only file that have extesion with .txt
+					if(in_array($file_type,$allow_type)){//check if selected file type is match to the allow file type we have defined
+						//let read content of each file
+						//before do this we need to move file from tmp dir to our dir by
+						move_uploaded_file($_FILES['file1']['tmp_name'][$i],'files/'.$_FILES['file1']['name'][$i]);
+						$read=fopen('files/'.$_FILES['file1']['name'][$i],"r");
+						while(!feof($read)){//check if not yet end of file
+							//echo str_replace(",","','",fgets($read));//in my text file i have comma to terminated for each word
+							//so i will replace comma to ',' to match mysql syntax for values to insert to table
+							//eg: insert into table_name values('val1','val2')
+							//now i just add "'" around it is done for values to insert to table
+							$values = "'".str_replace(",","','",fgets($read))."'";
+							$sql="insert into upload_test values($values)";
+							//now i will insert data from my form
+							mysql_query($sql);//execute sql string
+						}
+					}
+				}
+			}
+		?>
+	</body>
+</html>
